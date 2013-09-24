@@ -1,4 +1,4 @@
-simple
+The Meaning of Programs
 ======
 
-Chapter 2 The Meaning of Programs - *Understand Computation*
+Some sample code of Chapter 2 - The Meaning of Programs in the book **[Understand Computation](http://shop.oreilly.com/product/0636920025481.do)**
