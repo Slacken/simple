@@ -161,7 +161,6 @@ class Assign < Struct.new(:name, :expression)
       [DoNothing.new, environment.merge(name => expression.value )] # modify the environment
     end
   end
-
 end
 
 class Sequence < Struct.new(:first, :second)
