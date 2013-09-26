@@ -34,7 +34,7 @@ class Empty
   def to_nfa_design
     start_state = Object.new
     accept_states = Set[start_state]
-    rulebook = NFARuleBook.new([])
+    rulebook = NFARuleBook.new(Set[])
     NFADesign.new(start_state, accept_states, rulebook)
   end
 end
@@ -53,7 +53,7 @@ class Literal < Struct.new(:character)
   def to_nfa_design
     start_state = Object.new
     accept_state = Object.new
-    rulebook = NFARuleBook.new([FARule.new(start_state, character, accept_state)])
+    rulebook = NFARuleBook.new(Set[FARule.new(start_state, character, accept_state)])
     NFADesign.new(start_state, Set[accept_state], rulebook)
   end
 end
@@ -129,8 +129,15 @@ class Repeat < Struct.new(:pattern)
   end
 end
 
+# class Object
+#   def inspect
+#     "<#{object_id%1000}>"
+#   end
+# end
+
 # puts Concatenate.new(Literal.new('a'), Repeat.new(Literal.new('b'))).inspect
 # puts Empty.new.to_nfa_design.accepts?('')
 # puts Literal.new('a').to_nfa_design.accepts?('b')
 # puts Concatenate.new(Literal.new('a'), Literal.new('b')).inspect
-puts Repeat.new(Choose.new(Literal.new('a'), Literal.new('b'))).matches?('')
+# nfa = Concatenate.new(Literal.new('a'), Repeat.new(Literal.new('b'))).to_nfa_design
+# puts nfa.accepts?('abbbba')
