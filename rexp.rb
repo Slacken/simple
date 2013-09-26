@@ -74,11 +74,11 @@ class Concatenate < Struct.new(:left, :right)
     
     start_state = left_nfa_design.start_state
     accept_states = right_nfa_design.accept_states
-    rulebook = left_nfa_design.rulebook + 
-               right_nfa_design.rulebook + 
+    rules = left_nfa_design.rulebook.rules + 
+               right_nfa_design.rulebook.rules + 
                left_nfa_design.accept_states.map{|state| FARule.new(state, nil, right_nfa_design.start_state)}
     
-    NFADesign.new(start_state, accept_states, rulebook)
+    NFADesign.new(start_state, accept_states, NFARuleBook.new(rules))
   end
 end
 
@@ -98,12 +98,12 @@ class Choose < Struct.new(:left, :right)
     
     start_state = Object.new
     accept_state = Object.new
-    rulebook = left_nfa_design.rulebook + right_nfa_design.rulebook
-    rulebook << FARule.new(start_state, nil, left_nfa_design.start_state)
-    rulebook << FARule.new(start_state, nil, right_nfa_design.start_state)
-    rulebook += (left_nfa_design.accept_states + right_nfa_design.accept_states).map{|state| FARule.new(state, nil, accept_state )}
+    rules = left_nfa_design.rulebook.rules + right_nfa_design.rulebook.rules
+    rules << FARule.new(start_state, nil, left_nfa_design.start_state)
+    rules << FARule.new(start_state, nil, right_nfa_design.start_state)
+    rules += (left_nfa_design.accept_states + right_nfa_design.accept_states).map{|state| FARule.new(state, nil, accept_state )}
 
-    NFADesign.new(start_state, Set[accept_state], rulebook)
+    NFADesign.new(start_state, Set[accept_state], NFARuleBook.new(rules))
   end
 end
 
@@ -119,11 +119,13 @@ class Repeat < Struct.new(:pattern)
   end
 
   def to_nfa_design
-    start_state = pattern.start_state
-    accept_states = pattern.accept_states
-    rulebook = pattern.rulebook + accept_states.map{|state| FARule.new(state, nil, start_state)}
+    pattern_nfa_design = pattern.to_nfa_design
+    
+    start_state = pattern_nfa_design.start_state
+    accept_states = pattern_nfa_design.accept_states
+    rules = pattern_nfa_design.rulebook.rules + accept_states.map{|state| FARule.new(state, nil, start_state)}
 
-    NFADesign.new(start_state, accept_states, rulebook)
+    NFADesign.new(start_state, accept_states, NFARuleBook.new(rules))
   end
 end
 
@@ -131,4 +133,4 @@ end
 # puts Empty.new.to_nfa_design.accepts?('')
 # puts Literal.new('a').to_nfa_design.accepts?('b')
 # puts Concatenate.new(Literal.new('a'), Literal.new('b')).inspect
-puts Repeat.new(Choose.new(Literal.new('a'), Literal.new('b'))).inspect
+puts Repeat.new(Choose.new(Literal.new('a'), Literal.new('b'))).matches?('')
