@@ -1,5 +1,4 @@
-
-# ==== expression ====
+# language Simple, using big-step semantics
 
 class Number < Struct.new(:value)
   def to_s

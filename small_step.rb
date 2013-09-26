@@ -1,5 +1,4 @@
 # language Simple, using small-step semantics
-# module Simple
 
 # ============== Expression =================
 
