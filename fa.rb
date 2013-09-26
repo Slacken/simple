@@ -50,8 +50,16 @@ class NFARuleBook < Struct.new(:rules)
    
   alias :next_states_without_free_move :next_states
 
+  # watch out with free move !!
   def next_states(states, character)
-    next_states_without_free_move(states, nil) + next_states_without_free_move(states, character)
+    now_states = next_states_without_free_move(states + next_states_without_free_move(states, nil), character)
+    more_states = next_states_without_free_move(now_states, nil)
+    while(!more_states.subset?(now_states)) do
+      now_states += more_states
+      more_states = next_states_without_free_move(now_states, nil)
+    end
+    now_states
+    # next_states_without_free_move(states, nil) + next_states_without_free_move(states, character) # not accurate
   end
 end
 
