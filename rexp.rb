@@ -15,7 +15,7 @@ module Pattern
     end
   end
 
-  def matched?(string)
+  def matches?(string)
     to_nfa_design.accepts?(string)
   end
 end
@@ -74,7 +74,9 @@ class Concatenate < Struct.new(:left, :right)
     
     start_state = left_nfa_design.start_state
     accept_states = right_nfa_design.accept_states
-    rulebook = left_nfa_design.rulebook + right_nfa_design.rulebook + left_nfa_design.accept_states.map{|state| FARule.new(state, nil, right_nfa_design.start_state)}
+    rulebook = left_nfa_design.rulebook + 
+               right_nfa_design.rulebook + 
+               left_nfa_design.accept_states.map{|state| FARule.new(state, nil, right_nfa_design.start_state)}
     
     NFADesign.new(start_state, accept_states, rulebook)
   end
@@ -117,11 +119,16 @@ class Repeat < Struct.new(:pattern)
   end
 
   def to_nfa_design
-    
+    start_state = pattern.start_state
+    accept_states = pattern.accept_states
+    rulebook = pattern.rulebook + accept_states.map{|state| FARule.new(state, nil, start_state)}
+
+    NFADesign.new(start_state, accept_states, rulebook)
   end
 end
 
 # puts Concatenate.new(Literal.new('a'), Repeat.new(Literal.new('b'))).inspect
 # puts Empty.new.to_nfa_design.accepts?('')
 # puts Literal.new('a').to_nfa_design.accepts?('b')
-puts Choose.new(Literal.new('a'), Literal.new('b')).inspect
+# puts Concatenate.new(Literal.new('a'), Literal.new('b')).inspect
+puts Repeat.new(Choose.new(Literal.new('a'), Literal.new('b'))).inspect
