@@ -160,6 +160,16 @@ class DPDADesign < Struct.new(:start_state, :bottom_character, :accept_states, :
   end
 end
 
+class NPDADesign < Struct.new(:start_state, :bottom_character, :accept_states, :rulebook)
+  def to_npda
+    start_stack = Stack.new([bottom_character])
+    NPDA.new(Set[PDAConfiguration.new(start_state, start_stack)], accept_states, rulebook)
+  end
+
+  def accepts?(string)
+    to_npda.tap{|npda| npda.read_string(string) }.accepting?
+  end
+end
 
 # rulebook = DPDARuleBook.new([
 #   PDARule.new(1,'a', 2, '$',['a','$']),
