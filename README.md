@@ -10,3 +10,4 @@ Here are some interesting code of the book **[Understand Computation](http://sho
 ### The Simplest Computers
 
     Finite automata(DFA & NFA) - fa.rb
+    Regular expression - rexp.rb
