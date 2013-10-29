@@ -77,6 +77,30 @@ class DPDARuleBook < Struct.new(:rules)
   end
 end
 
+require 'set'
+class NPDARuleBook < Struct.new(:rules)
+  def next_configurations(configurations, character) # next configurations of current configurations
+    configurations.flat_map{|configuration| follow_rules_for(configuration, character)}.to_set
+  end
+
+  def rules_for(configuration, character)
+    rules.select{|rule| rule.aplies_to?(configuration, character)}
+  end
+
+  def follow_rules_for(configuration, character)
+    rules_for(configuration, character).map{|rule| rule.follow(configuration)}
+  end
+
+  def follow_free_moves(configurations)
+    more_configurations = next_configurations(configurations, nil)
+    if more_configurations.subset?(configurations)
+      configurations
+    else
+      follow_free_moves(more_configurations + configurations)
+    end
+  end
+end
+
 class DPDA < Struct.new(:current_configuration, :accept_states, :rulebook)
   def current_configuration
     rulebook.follow_free_moves(super)
@@ -107,6 +131,24 @@ class DPDA < Struct.new(:current_configuration, :accept_states, :rulebook)
   end
 end
 
+class NPDA < Struct.new(:current_configurations, :accept_states, :rulebook)
+  def current_configurations
+    rulebook.follow_free_moves(super)
+  end
+
+  def accepting?
+    current_configurations.any?{|configuration| accept_states.include?(configuration.state)}
+  end
+
+  def read_character(character)
+    self.current_configurations = rulebook.next_configurations(current_configurations, character)
+  end
+
+  def read_string(string)
+    string.chars.each{|character| read_character(character)}
+  end
+end
+
 class DPDADesign < Struct.new(:start_state, :bottom_character, :accept_states, :rulebook)
   def to_dpda
     start_stack = Stack.new([bottom_character])
@@ -119,15 +161,19 @@ class DPDADesign < Struct.new(:start_state, :bottom_character, :accept_states, :
 end
 
 
-rulebook = DPDARuleBook.new([
-  PDARule.new(1,'(', 2, '$',['b','$']),
-  PDARule.new(2,'(', 2, 'b',['b','b']),
-  PDARule.new(2,')', 2, 'b',[]),
-  PDARule.new(2,nil, 1, '$',['$']) # free move
-])
-configuration = PDAConfiguration.new(1, Stack.new(['$']))
+# rulebook = DPDARuleBook.new([
+#   PDARule.new(1,'a', 2, '$',['a','$']),
+#   PDARule.new(1,'b', 2, '$',['b','$']),
+#   PDARule.new(2,'a', 2, 'a',['a','a']),
+#   PDARule.new(2,'b', 2, 'b',['b','b']),
+#   PDARule.new(2,'a', 2, 'b',[]),
+#   PDARule.new(2,'b', 2, 'a',[]),
+#   PDARule.new(2,nil, 1, '$',['$']) # free move
+# ])
+# configuration = PDAConfiguration.new(1, Stack.new(['$']))
 
-dpda = DPDA.new(configuration, [1], rulebook)
-puts dpda.accepting?
-dpda.read_string('()(()))')
-puts dpda.accepting?
+# dpda = DPDA.new(configuration, [1], rulebook)
+# puts dpda.accepting?
+# dpda.read_string('abba')
+# puts dpda.accepting?
+
